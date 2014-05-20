@@ -6,6 +6,11 @@ public class Trecho {
 	private String destino;
 	private Integer distancia;
 	
+	public Trecho(String origem, String destino){
+		this.origem = origem;
+		this.destino = destino;
+	}
+	
 	public Trecho(String origem, String destino, Integer distancia){
 		this.origem = origem;
 		this.destino = destino;
@@ -62,6 +67,11 @@ public class Trecho {
 		} else if (!origem.equals(other.origem))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+	    return this.origem + this.destino;
 	}
 	
 }

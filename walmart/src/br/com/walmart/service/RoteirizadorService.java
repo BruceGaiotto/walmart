@@ -7,32 +7,36 @@ import br.com.walmart.Trecho;
 import br.com.walmart.dao.TrechoDaoImplMemory;
 
 public class RoteirizadorService {
-	
-	//@Autowired
-	private TrechoDaoImplMemory trechoDao = new TrechoDaoImplMemory();
 
-	public Rota calculaRota(Trecho trechoRota){
-		Rota rota = new Rota();
+    // @Autowired
+    private TrechoDaoImplMemory trechoDao = new TrechoDaoImplMemory();
 
-		List<Trecho> trechos = this.trechoDao.findAll();
-		
-		/**
-		 * Se a rota a ser calculada ja for um dos trechos existentes, retorna o proprio trecho.
-		 * Obs. considerando-se que um trecho eh a menor distancia entre 2 pontos.
-		 */
-		if(trechos.contains(trechoRota)){
-			trechoRota = trechos.get(trechos.indexOf(trechoRota));
-			rota.add(trechoRota);
-			return rota;
-		}
-		
-		List<Trecho> trechosOrigem = trechoDao.findTrechoByOrigem(trechoRota.getOrigem());
-		for(Trecho trecho : trechosOrigem) {
-			rota = new Rota();
-			rota.add(trecho);
-		}
-		
-		return null;
+    public void calculaRota(String origem, String destino) {
+	Trecho trechoRota = new Trecho(origem, destino);
+
+	Rota rota = new Rota();
+	rota.setOrigem(origem);
+	Rota.setDestinoSolicitado(destino);
+	Rota.setTrechoDao(new TrechoDaoImplMemory());
+
+	List<Trecho> trechos = this.trechoDao.findAll();
+	if (trechos.contains(trechoRota)) {
+	    /**
+	     * Considerando que os trechos sao unicos, desta maneira nao havera dois indices.
+	     */
+	    Trecho trechoSolucao = trechos.get(trechos.indexOf(trechoRota));
+	    Rota.setDistanciaSolucao(trechoSolucao.getDistancia());
+
+	    Rota primeiraSolucao = new Rota();
+	    primeiraSolucao.add(trechoSolucao);
+	    System.out.println("Primeira solução encontrada: " + primeiraSolucao);
 	}
+
+	/**
+	 * Continua procurando por rotas mais curtas ainda que passem por mais pontos.
+	 */
+	Thread thread = new Thread(rota,""+trechoRota);
+	thread.start();
+    }
 
 }
