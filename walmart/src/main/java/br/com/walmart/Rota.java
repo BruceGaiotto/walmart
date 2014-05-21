@@ -2,56 +2,73 @@ package br.com.walmart;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import br.com.walmart.dao.TrechoDaoImplMemory;
 
 public class Rota extends ArrayList<Trecho> implements Runnable {
-    
+
     private static final long serialVersionUID = 4312981990264159895L;
     /**
-     * Atributo a ser compartilhado entre todas as Threads a fim de comparacao e gatilho para a nao continuidade das proximas Threads.
+     * Atributo a ser compartilhado entre todas as Threads a fim de comparacao e
+     * gatilho para a nao continuidade das proximas Threads.
      */
-    private static Integer distanciaSolucao = Integer.MAX_VALUE;
+    private static Integer distanciaMelhorSolucao = Integer.MAX_VALUE;
+    /**
+     * Caminho percorrido na melhor solucao.
+     */
+    private static String caminhoMelhorSolucao = "";
+    /**
+     * Número máximo de pontos que deverá conter a rota final (solução).<br>
+     * Utilizado neste caso como mais um ponto de parada para o processo recursivo de busca.
+     */
+    private static Integer numeroMaximoTrechosRotaFinal;
     /**
      * Destino final do percurso solicitado.
      */
     private static String destinoSolicitado;
-    
+
     private static TrechoDaoImplMemory trechoDao;
-    
+
     private Integer distanciaPercorrida = 0;
     private String caminhoPercorrido = "";
     /**
-     * Origem para continuidade da rota. Não representa a origem do percurso solicitado.
+     * Origem do próximo trecho para continuidade da rota.<br>
+     * Não representa a origem do percurso solicitado.
      */
-    private String origem;
-    
+    private String origemProximoTrecho;
+    /**
+     * 
+     */
+    private static Set<String> threadsEmExecucao;
 
     @Override
     public void run() {
-	//ListIterator<Trecho> listIterator = this.listIterator();
-	
-	List<Trecho> trechosOrigem = Rota.trechoDao.findTrechoByOrigem(this.origem);
+	List<Trecho> trechosOrigem = Rota.trechoDao.findTrechoByOrigem(this.origemProximoTrecho);
 	for (Trecho trecho : trechosOrigem) {
-	   if(this.distanciaPercorrida < Rota.distanciaSolucao && trecho.getDistancia() < Rota.distanciaSolucao) {
-		Rota rota = (Rota)this.clone();
-    	    	//while(listIterator.hasNext()) {
-    	    	//    rota.add(listIterator.next());
-    	    	//}
-    	    	rota.add(trecho);
-    	    	rota.setOrigem(trecho.getDestino());
-    	    	
-    	    	if(Rota.destinoSolicitado.equals(trecho.getDestino())) {
-    	    	    Rota.setDistanciaSolucao(rota.distanciaPercorrida);
-    	    	    System.out.println("Solução encontrada: " + rota);
-    	    	} else {
-    	    	    Thread thread = new Thread(rota, rota.getCaminhoPercorrido());
-	    	    thread.start();
-    	    	}
-	    } 
+	    if (this.distanciaPercorrida < Rota.distanciaMelhorSolucao && trecho.getDistancia() < Rota.distanciaMelhorSolucao) {
+		Rota rota = (Rota) this.clone();
+		rota.add(trecho);
+
+		if (Rota.destinoSolicitado.equals(trecho.getDestino())) {
+		    Rota.setDistanciaMelhorSolucao(rota.distanciaPercorrida);
+		    Rota.setCaminhoMelhorSolucao(rota.caminhoPercorrido);
+		} else {
+		    /**
+		     * Ponto de prosseguimento/parada da recursao!
+		     */
+		    if (rota.size() < Rota.numeroMaximoTrechosRotaFinal) {
+			rota.setOrigemProximoTrecho(trecho.getDestino());
+			Thread thread = new Thread(rota, rota.getCaminhoPercorrido());
+			thread.start();
+			Rota.getThreadsEmExecucao().add(thread.getName());
+		    }
+		}
+	    }
 	}
+	Rota.getThreadsEmExecucao().remove(Thread.currentThread().getName());
     }
-    
+
     @Override
     public boolean add(Trecho e) {
 	if (e != null) {
@@ -86,38 +103,58 @@ public class Rota extends ArrayList<Trecho> implements Runnable {
 	this.caminhoPercorrido = caminhoPercorrido;
     }
 
-    public static synchronized Integer getDistanciaSolucao() {
-        return distanciaSolucao;
+    public static synchronized Integer getDistanciaMelhorSolucao() {
+	return distanciaMelhorSolucao;
     }
 
-    public static synchronized void setDistanciaSolucao(Integer distanciaSolucao) {
-        if(distanciaSolucao < Rota.distanciaSolucao) {
-            Rota.distanciaSolucao = distanciaSolucao;
-        }
+    public static synchronized void setDistanciaMelhorSolucao(Integer distanciaSolucao) {
+	if (distanciaSolucao < Rota.distanciaMelhorSolucao) {
+	    Rota.distanciaMelhorSolucao = distanciaSolucao;
+	}
     }
 
-    public synchronized String getOrigem() {
-        return origem;
+    public synchronized String getOrigemProximoTrecho() {
+	return origemProximoTrecho;
     }
 
-    public synchronized void setOrigem(String origem) {
-        this.origem = origem;
+    public synchronized void setOrigemProximoTrecho(String origemProximoTrecho) {
+	this.origemProximoTrecho = origemProximoTrecho;
     }
 
     public static synchronized TrechoDaoImplMemory getTrechoDao() {
-        return trechoDao;
+	return trechoDao;
     }
 
     public static synchronized void setTrechoDao(TrechoDaoImplMemory trechoDao) {
-        Rota.trechoDao = trechoDao;
+	Rota.trechoDao = trechoDao;
     }
 
     public static synchronized String getDestinoSolicitado() {
-        return destinoSolicitado;
+	return destinoSolicitado;
     }
 
     public static synchronized void setDestinoSolicitado(String destinoSolicitado) {
-        Rota.destinoSolicitado = destinoSolicitado;
+	Rota.destinoSolicitado = destinoSolicitado;
     }
-    
+
+    public static synchronized void setNumeroMaximoTrechosRotaFinal(Integer numeroMaximoTrechosRotaFinal) {
+	Rota.numeroMaximoTrechosRotaFinal = numeroMaximoTrechosRotaFinal;
+    }
+
+    public static synchronized Set<String> getThreadsEmExecucao() {
+        return threadsEmExecucao;
+    }
+
+    public static synchronized void setThreadsEmExecucao(Set<String> threadsEmExecucao) {
+        Rota.threadsEmExecucao = threadsEmExecucao;
+    }
+
+    public static synchronized String getCaminhoMelhorSolucao() {
+        return caminhoMelhorSolucao;
+    }
+
+    public static synchronized void setCaminhoMelhorSolucao(String caminhoMelhorSolucao) {
+        Rota.caminhoMelhorSolucao = caminhoMelhorSolucao;
+    }
+
 }
