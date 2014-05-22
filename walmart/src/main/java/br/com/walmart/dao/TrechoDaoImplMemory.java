@@ -18,6 +18,10 @@ public class TrechoDaoImplMemory {
 		this.trechos = new ArrayList<Trecho>();
 		
 		trechos.add(new Trecho("A","B",10));
+		trechos.add(new Trecho("A","F",1));
+		trechos.add(new Trecho("F","G",1));
+		trechos.add(new Trecho("G","H",1));
+		trechos.add(new Trecho("H","B",1));
 		trechos.add(new Trecho("B","D",15));
 		trechos.add(new Trecho("A","C",20));
 		trechos.add(new Trecho("C","D",30));
