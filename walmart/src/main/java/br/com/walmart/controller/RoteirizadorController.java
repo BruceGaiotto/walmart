@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import br.com.walmart.Rota;
 import br.com.walmart.service.RoteirizadorService;
 
 @Controller
@@ -23,12 +24,14 @@ public class RoteirizadorController {
     @RequestMapping(value = "/consultaRota/{origem}/{destino}", method = RequestMethod.GET)
     public @ResponseBody String consultaRota(@PathVariable final String origem, @PathVariable final String destino) {
 	
-	//TODO recuperar o resultado da execucao das Threads
-	service.calculaRota(origem, destino);
-	
 	//TODO formatar retorno de acordo com resultado avaliado
-	return "Rest service executado com sucesso";
+	Rota rota = service.calculaRota(origem, destino); 
+	return ""+rota;
     }
     
+    @RequestMapping(value = "/gravaTrecho/{origem}/{destino}/{distancia}", method = RequestMethod.PUT)
+    public @ResponseBody String gravaTrecho(@PathVariable final String origem, @PathVariable final String destino, @PathVariable final Integer distancia) {
+	return "Trecho: " + origem + destino + ". Distancia: " + distancia;
+    }
 
 }
