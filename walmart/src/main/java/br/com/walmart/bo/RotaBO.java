@@ -56,8 +56,7 @@ public class RotaBO extends Rota implements Runnable {
 		rotaBO.add(trecho);
 
 		if (RotaBO.destinoSolicitado.equals(trecho.getDestino())) {
-		    RotaBO.setDistanciaMelhorSolucao(rotaBO.distanciaPercorrida);
-		    RotaBO.setCaminhoMelhorSolucao(rotaBO.caminhoPercorrido);
+		    RotaBO.setMelhorSolucaoAteAgora(rotaBO.caminhoPercorrido, rotaBO.distanciaPercorrida);
 		} else {
 		    /**
 		     * Ponto de prosseguimento/parada da recursao!
@@ -82,9 +81,10 @@ public class RotaBO extends Rota implements Runnable {
 	return distanciaMelhorSolucao;
     }
 
-    public static synchronized void setDistanciaMelhorSolucao(Integer distanciaSolucao) {
+    public static synchronized void setMelhorSolucaoAteAgora(String caminhoSolucao, Integer distanciaSolucao) {
 	if (distanciaSolucao < RotaBO.distanciaMelhorSolucao) {
 	    RotaBO.distanciaMelhorSolucao = distanciaSolucao;
+	    RotaBO.caminhoMelhorSolucao = caminhoSolucao;
 	}
     }
 
@@ -126,10 +126,6 @@ public class RotaBO extends Rota implements Runnable {
 
     public static synchronized String getCaminhoMelhorSolucao() {
 	return caminhoMelhorSolucao;
-    }
-
-    public static synchronized void setCaminhoMelhorSolucao(String caminhoMelhorSolucao) {
-	RotaBO.caminhoMelhorSolucao = caminhoMelhorSolucao;
     }
 
     public static synchronized void setDefaultConfigurations() {

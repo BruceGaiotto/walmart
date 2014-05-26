@@ -52,8 +52,7 @@ public class RoteirizadorService {
 	     * Considerando que os trechos sao unicos, desta maneira nao havera dois indices.
 	     */
 	    Trecho trechoSolucao = trechos.get(trechos.indexOf(trechoRota));
-	    RotaBO.setDistanciaMelhorSolucao(trechoSolucao.getDistancia());
-	    RotaBO.setCaminhoMelhorSolucao(trechoRota.getOrigem() + trechoRota.getDestino());
+	    RotaBO.setMelhorSolucaoAteAgora(trechoRota.toString(), trechoSolucao.getDistancia());
 	}
 
 	/**
