@@ -44,7 +44,7 @@ public class RoteirizadorTest extends AbstractJUnit4SpringContextTests {
 	Assert.assertNotNull(rota);
     }
     
-    @Test
+    //@Test
     public void testeAC() {
 	long timeInMillisBefore = Calendar.getInstance().getTimeInMillis();
 	Rota rota = service.calculaRota("A", "C");
